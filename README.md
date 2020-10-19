@@ -1,8 +1,8 @@
 # pypurea9
 
 [![Build Status](https://travis-ci.org/hymnis/pypurea9.svg?branch=master)](https://travis-ci.org/hymnis/pypurea9)
-[![pyi](https://img.shields.io/pypi/v/pypurea9.svg)](https://pypi.python.org/pypi/pypurea9)
-[![pyi](https://img.shields.io/pypi/pyversions/pypurea9.svg)](https://pypi.python.org/pypi/pypurea9)
+[![Maintainability](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/maintainability)](https://codeclimate.com/github/hymnis/pypurea9/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/test_coverage)](https://codeclimate.com/github/hymnis/pypurea9/test_coverage)
 
 Python 3 API for communicating with an Electrolux Pure A9 air purifier, through the cloud (yes, no local control is possible at this point).
 
