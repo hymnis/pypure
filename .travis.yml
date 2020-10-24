@@ -3,10 +3,10 @@ env:
     - CC_TEST_REPORTER_ID=f623122fc9db8ff7147d82f879a261b6e6391025ec1a6b3c14e48c0c11776aa0
 language: python
 python:
-- 3.5
 - 3.6
 - 3.7
 - 3.8
+- 3.9
 install:
 - pip install -r requirements.txt
 - pip install flake8
