@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-# <hymnis@plazed.net> 2020
 
 """
 Python API for Electrolux Pure A9 air purifier.
@@ -162,7 +161,7 @@ class ElectroluxDeltaApi:
             trace(2, response_json, pretty=True)  # DEBUG
 
             if "accessToken" not in response_json:
-                raise PureA9Error(
+                raise PyPureError(
                     "Error refreshing client token! "
                     + response_json["codeDescription"]
                 )
@@ -190,7 +189,7 @@ class ElectroluxDeltaApi:
             )
             response_json = response.json()
             if not response_json["accessToken"]:
-                raise PureA9Error("Login error: %s" % response.reason)
+                raise PyPureError("Login error: %s" % response.reason)
 
             self._auth_state["userToken"] = response_json["accessToken"]
         except ConnectionError as err:
@@ -223,10 +222,10 @@ class ElectroluxDeltaApi:
                 _LOGGER.error("Error: %s" % response.status_code)
                 self.refresh_user_token()
             else:
-                raise PureA9Error(
+                raise PyPureError(
                     "Internal server error: %s" % response.status_code
                 )
-        raise PureA9Error("Internal error. Too many authentication attempts")
+        raise PyPureError("Internal error. Too many authentication attempts")
 
 
 class PyPure(ElectroluxDeltaApi):
@@ -273,7 +272,7 @@ class PyPureError(Exception):
 
 def get_devices(args):
     """Get all configured devices/appliances."""
-    api = PyPureargs.client_secret, args.username, args.password)
+    api = PyPure(args.client_secret, args.username, args.password)
     devices = api.get_appliances()
 
     if sys.stdout.isatty():
@@ -298,7 +297,7 @@ def set_state(args):
 
 def self_test(args):
     """Check if connection to API works."""
-    api = PyPure)
+    api = PyPure()
     ok = api.check_for_update()
 
     if sys.stdout.isatty():
