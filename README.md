@@ -1,8 +1,8 @@
 # pypure
 
 [![Build Status](https://travis-ci.org/hymnis/pypure.svg?branch=master)](https://travis-ci.org/hymnis/pypure)
-[![Maintainability](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/maintainability)](https://codeclimate.com/github/hymnis/pypure/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/test_coverage)](https://codeclimate.com/github/hymnis/pypure/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c944150f355a37b82687/maintainability)](https://codeclimate.com/github/hymnis/pypure/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c944150f355a37b82687/test_coverage)](https://codeclimate.com/github/hymnis/pypure/test_coverage)
 
 Python 3 API for communicating with an Electrolux Pure appliances, through the cloud (yes, there's no local control is possible at this point).
 
