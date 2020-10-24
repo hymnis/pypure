@@ -1,10 +1,10 @@
-# pypurea9
+# pypure
 
-[![Build Status](https://travis-ci.org/hymnis/pypurea9.svg?branch=master)](https://travis-ci.org/hymnis/pypurea9)
-[![Maintainability](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/maintainability)](https://codeclimate.com/github/hymnis/pypurea9/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/test_coverage)](https://codeclimate.com/github/hymnis/pypurea9/test_coverage)
+[![Build Status](https://travis-ci.org/hymnis/pypure.svg?branch=master)](https://travis-ci.org/hymnis/pypure)
+[![Maintainability](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/maintainability)](https://codeclimate.com/github/hymnis/pypure/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/99b6552ee2e6848806f0/test_coverage)](https://codeclimate.com/github/hymnis/pypure/test_coverage)
 
-Python 3 API for communicating with an Electrolux Pure A9 air purifier, through the cloud (yes, no local control is possible at this point).
+Python 3 API for communicating with an Electrolux Pure appliances, through the cloud (yes, there's no local control is possible at this point).
 
 There is currently no open API, but Electrolux have said that they are going to release one eventually.
 
@@ -12,7 +12,7 @@ There is currently no open API, but Electrolux have said that they are going to 
 
 The fast and easy way:
 ```bash
-pip3 install pypurea9
+pip3 install pypure
 ```
 
 The not as fast way:
@@ -25,7 +25,7 @@ python3 setup.py install
 
 - Python 3
 - The [requests](http://docs.python-requests.org/) module.
-- A Pure A9 device that is properly setup in the Electrolux Wellbeing phone app.
+- A Pure appliance/device that is properly setup in the Electrolux Wellbeing phone app.
 - The client secret, username and password used in Electrolux Wellbeing phone app.
 
 ## Command-line usage
@@ -33,8 +33,8 @@ python3 setup.py install
 ### Help
 
 ```bash
-purea9 -h
-purea9 <command> -h
+pypure -h
+pypure <command> -h
 ```
 
 ### Commands
@@ -50,32 +50,36 @@ purea9 <command> -h
 ```python
 #! /usr/bin/env python3
 
-from pypurea9 import PureA9, PureA9Error
+from pypure import PyPure, PyPureError
 
 # credentials as parameters
-purea9_client = PureA9('ankJaAjapsdvxu9xc9in2jkasdASda34wf', 'Myname', 'abc123')
-devices = purea9_client.get_devices()
-print(purea9_client.get_info(devices[0]))
-print(purea9_client.get_data(devices[0]))
+pure_client = PyPure('ankJaAjapsdvxu9xc9in2jkasdASda34wf', 'Myname', 'abc123')
+devices = pure_client.get_devices()
+print(pure_client.get_info(devices[0]))
+print(pure_client.get_data(devices[0]))
 
 try:
   # turn the unit off
-  purea9_client.set_state(devices[0], 'power', 'off')
+  pure_client.set_state(devices[0], 'power', 'off')
 
   # turn the unit on and set to manual mode, with given speed setting
-  purea9_client.set_state(devices[0], 'power', 'on')
-  purea9_client.set_state(devices[0], 'preset_mode', 'manual')
-  purea9_client.set_state(devices[0], 'fan_mode', '6')
+  pure_client.set_state(devices[0], 'power', 'on')
+  pure_client.set_state(devices[0], 'preset_mode', 'manual')
+  pure_client.set_state(devices[0], 'fan_mode', '6')
 
   # or with a single call (the state order is important)
-  purea9_client.set_state(devices[0], {
+  pure_client.set_state(devices[0], {
     'power': 'on,
     'preset_mode': 'manual',
     'fan_mode': '6'
   })
-except PureA9Error as err:
+except PyPureError as err:
   print(f"Something went wrong! See here: {err}")
 ```
+
+## Supported appliances/devices
+
+- Electrolux Pure A9 (PA91-404GY) - _in testing_
 
 ## License and warranty
 

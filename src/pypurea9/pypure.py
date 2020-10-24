@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# hymnis, 2020
+# <hymnis@plazed.net> 2020
 
 """
 Python API for Electrolux Pure A9 air purifier.
@@ -92,8 +92,11 @@ def make_request(method, url, data, headers=None):
     trace(2, data, pretty=True)
     start_time = time.time()
     response = requests.request(method, url, data=data, headers=headers)
-    trace(1, "<<<< %d bytes in %.3f s" %
-          (len(response.content), time.time() - start_time))
+    trace(
+        1,
+        "<<<< %d bytes in %.3f s"
+        % (len(response.content), time.time() - start_time),
+    )
     content = json.loads(response.content)
     trace(2, content, pretty=True)
 
@@ -109,19 +112,16 @@ class ElectroluxDeltaApi:
         "mmsToken": None,
         "userToken": None,
         "username": None,
-        "password": None
+        "password": None,
     }
 
     def __init__(self, client_secret, username, password):
-        self._auth_state['clientSecret'] = client_secret
-        self._auth_state['username'] = username
-        self._auth_state['password'] = password
+        self._auth_state["clientSecret"] = client_secret
+        self._auth_state["username"] = username
+        self._auth_state["password"] = password
 
     def check_for_update(self):
-        payload = {
-            "Version": _CLIENT_VERSION,
-            "Platform": _OS_PLATFORM
-        }
+        payload = {"Version": _CLIENT_VERSION, "Platform": _OS_PLATFORM}
 
         try:
             # response = requests.post(
@@ -130,13 +130,17 @@ class ElectroluxDeltaApi:
             #     headers={"Content-Type": "application/json"}
             # )
             # response_json = response.json()
-            response_json = make_request("POST", f"{_BASE_URL}updates/Wellbeing", data=json.dumps(
-                payload), headers={"Content-Type": "application/json"})
+            response_json = make_request(
+                "POST",
+                f"{_BASE_URL}updates/Wellbeing",
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+            )
 
-            if not response_json['forceUpdate']:
+            if not response_json["forceUpdate"]:
                 _LOGGER.error("Invalid response from update server")
 
-            if response_json['forceUpdate']:
+            if response_json["forceUpdate"]:
                 _LOGGER.info("Back-end API needs to be updated")
 
             return response_json
@@ -146,30 +150,32 @@ class ElectroluxDeltaApi:
 
     def refresh_client_token(self):
         self.check_for_update()
-        payload = {"ClientSecret": self._auth_state['clientSecret']}
+        payload = {"ClientSecret": self._auth_state["clientSecret"]}
 
         try:
             response = requests.post(
                 f"{_BASE_URL}Clients/Wellbeing",
                 data=json.dumps(payload),
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
             response_json = response.json()
-            trace(1, response_json, pretty=True)  # DEBUG
+            trace(2, response_json, pretty=True)  # DEBUG
 
             if "accessToken" not in response_json:
                 raise PureA9Error(
-                    "Error refreshing client token! " + response_json['codeDescription'])
+                    "Error refreshing client token! "
+                    + response_json["codeDescription"]
+                )
 
-            self._auth_state['clientToken'] = response_json['accessToken']
+            self._auth_state["clientToken"] = response_json["accessToken"]
         except ConnectionError as err:
             _LOGGER.error("Connection error! %s" % err)
 
     def refresh_user_token(self):
         self.refresh_client_token()
         payload = {
-            "userName": self._auth_state['username'],
-            "password": self._auth_state['password'],
+            "userName": self._auth_state["username"],
+            "password": self._auth_state["password"],
         }
 
         try:
@@ -178,34 +184,37 @@ class ElectroluxDeltaApi:
                 data=json.dumps(payload),
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self._auth_state['clientToken']}"
-                }
+                    "Authorization":
+                        f"Bearer {self._auth_state['clientToken']}",
+                },
             )
             response_json = response.json()
-            if not response_json['accessToken']:
+            if not response_json["accessToken"]:
                 raise PureA9Error("Login error: %s" % response.reason)
 
-            self._auth_state['userToken'] = response_json['accessToken']
+            self._auth_state["userToken"] = response_json["accessToken"]
         except ConnectionError as err:
             _LOGGER.error("Connection error! %s" % err)
 
     def fetch_api(self, suffix, options=None):
         if not options:
             options = {"method": None, "headers": None, "data": None}
-        if not options['method']:
-            options['method'] = "POST"
-        if not options['headers']:
-            options['headers'] = {}
+        if not options["method"]:
+            options["method"] = "POST"
+        if not options["headers"]:
+            options["headers"] = {}
 
         for i in range(3):
-            if self._auth_state['userToken']:
-                options['headers']['Authorization'] = f"Bearer {self._auth_state['userToken']}"
+            if self._auth_state["userToken"]:
+                options["headers"][
+                    "Authorization"
+                ] = f"Bearer {self._auth_state['userToken']}"
 
             response = requests.request(
-                method=options['method'],
+                method=options["method"],
                 url=f"{_BASE_URL}{suffix}",
-                headers=options['headers'],
-                data=options['data']
+                headers=options["headers"],
+                data=options["data"],
             )
 
             if response.status_code == 200:
@@ -214,13 +223,14 @@ class ElectroluxDeltaApi:
                 _LOGGER.error("Error: %s" % response.status_code)
                 self.refresh_user_token()
             else:
-                raise PureA9Error("Internal server error: %s" %
-                                  response.status_code)
+                raise PureA9Error(
+                    "Internal server error: %s" % response.status_code
+                )
         raise PureA9Error("Internal error. Too many authentication attempts")
 
 
-class PureA9(ElectroluxDeltaApi):
-    """Class to interface with a Pure A9 air purifier."""
+class PyPure(ElectroluxDeltaApi):
+    """Class to interface with a Pure appliance."""
 
     def __init__(self, client_secret=None, username=None, password=None):
         """Initialize a device."""
@@ -228,11 +238,11 @@ class PureA9(ElectroluxDeltaApi):
         self._initialized = True
 
     def set_token(self, token):
-        self._auth_state['userToken'] = token
+        self._auth_state["userToken"] = token
 
     def set_credentials(self, username, password):
-        self._auth_state['username'] = username
-        self._auth_state['password'] = password
+        self._auth_state["username"] = username
+        self._auth_state["password"] = password
 
     def verify_credentials(self):
         self.refresh_user_token()
@@ -249,12 +259,12 @@ class PureA9(ElectroluxDeltaApi):
             {
                 "method": "PUT",
                 "data": json.dumps(command),
-                "headers": {"Content-Type": "application/json"}
-            }
+                "headers": {"Content-Type": "application/json"},
+            },
         )
 
 
-class PureA9Error(Exception):
+class PyPureError(Exception):
     """Class for error handling."""
 
     def __init__(self, message):
@@ -263,7 +273,7 @@ class PureA9Error(Exception):
 
 def get_devices(args):
     """Get all configured devices/appliances."""
-    api = PureA9(args.client_secret, args.username, args.password)
+    api = PyPureargs.client_secret, args.username, args.password)
     devices = api.get_appliances()
 
     if sys.stdout.isatty():
@@ -288,14 +298,14 @@ def set_state(args):
 
 def self_test(args):
     """Check if connection to API works."""
-    api = PureA9()
+    api = PyPure)
     ok = api.check_for_update()
 
     if sys.stdout.isatty():
         if ok:
-            print("pypurea9 : API OK")
+            print("pypure : API OK")
         else:
-            print("pypurea9 : API ERROR")
+            print("pypure : API ERROR")
 
     exit(0 if ok else 1)
 
@@ -305,7 +315,7 @@ def main():
     global VERBOSITY
 
     parser = argparse.ArgumentParser(
-        description="pypurea9 Python3 library",
+        description="pypure Python3 library",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -317,38 +327,46 @@ def main():
         action="count",
         default=VERBOSITY,
     )
-    parser.add_argument("-c", "--client_secret",
-                        help="your client secret", required=True)
-    parser.add_argument("-u", "--username",
-                        help="your username", required=True)
-    parser.add_argument("-p", "--password",
-                        help="your password", required=True)
+    parser.add_argument(
+        "-c", "--client_secret", help="your client secret", required=True
+    )
+    parser.add_argument(
+        "-u", "--username", help="your username", required=True
+    )
+    parser.add_argument(
+        "-p", "--password", help="your password", required=True
+    )
 
     subparsers = parser.add_subparsers(help="sub-commands", dest="action")
 
     # action "get_devices"
     sp = subparsers.add_parser(
-        "get_devices", help="list all devices").set_defaults(func=get_devices)
+        "get_devices", help="list all devices"
+    ).set_defaults(func=get_devices)
 
     # action "get_info"
     sp = subparsers.add_parser("get_info", help="list device information")
-    sp.add_argument("-d", "--device",
-                    help="the device to target", required=True)
+    sp.add_argument(
+        "-d", "--device", help="the device to target", required=True
+    )
     sp.set_defaults(func=get_info)
 
     # action "get_data"
     sp = subparsers.add_parser("get_data", help="list device sensor data")
-    sp.add_argument("-d", "--device",
-                    help="the device to target", required=True)
+    sp.add_argument(
+        "-d", "--device", help="the device to target", required=True
+    )
     sp.set_defaults(func=get_data)
 
     # action "set_state"
     sp = subparsers.add_parser("set_state", help="set desired device state")
-    sp.add_argument("-d", "--device",
-                    help="the device to target", required=True)
+    sp.add_argument(
+        "-d", "--device", help="the device to target", required=True
+    )
     sp.add_argument("-s", "--state", help="the state to change", required=True)
-    sp.add_argument("-a", "--argument",
-                    help="the new state value", required=True)
+    sp.add_argument(
+        "-a", "--argument", help="the new state value", required=True
+    )
     sp.set_defaults(func=set_state)
 
     # action "test"
@@ -359,7 +377,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print(pkg_resources.require("pypurea9")[0])
+        print(pkg_resources.require("pypure")[0])
         exit(0)
 
     # set the verbose level as a global variable
